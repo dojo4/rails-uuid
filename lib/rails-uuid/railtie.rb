@@ -12,16 +12,18 @@ module RailsUUID
   #
 
   if defined?(Rake)
-    rake_extension = <<-__
+    extend Rake::DSL if defined?(Rake::DSL)
+
+    module_eval <<-__, __FILE__, __LINE__
+
       namespace(:db) do
         namespace(:schema) do
           task(:dump => :environment) do
           end
         end
       end
-    __
 
-    eval(rake_extension)
+    __
   end
 
   config.after_initialize do
@@ -84,7 +86,7 @@ module RailsUUID
       def quote(value, column = nil)
         return super unless column
 
-        if column.type == :uuid
+        if column.type == :uuid && !value.blank?
           re = /^ [0-9a-zA-Z]{8} - [0-9a-zA-Z]{4} - [0-9a-zA-Z]{4} - [0-9a-zA-Z]{4} - [0-9a-zA-Z]{12} $/iox
           unless value.to_s =~ re
             value = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
